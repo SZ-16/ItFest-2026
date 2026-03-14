@@ -6,7 +6,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 @Composable
 actual fun MapContent(modifier: Modifier) {
@@ -16,19 +15,12 @@ actual fun MapContent(modifier: Modifier) {
             MapView(context).apply {
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
-
-                // Center on Timișoara
-                controller.setZoom(14.0)
-                controller.setCenter(GeoPoint(45.7489, 21.2087))
-
-                // User location overlay
-                val locationOverlay = MyLocationNewOverlay(this)
-                locationOverlay.enableMyLocation()
-                overlays.add(locationOverlay)
+                controller.setZoom(15.0)
+                controller.setCenter(GeoPoint(45.7489, 21.2087)) // Timișoara
             }
         },
-        update = { mapView ->
-            mapView.onResume()
+        update = { view ->
+            // Update the view if needed
         }
     )
 }
