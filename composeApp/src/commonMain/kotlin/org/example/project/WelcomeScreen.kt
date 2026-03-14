@@ -34,7 +34,7 @@ fun WelcomeScreen(onGetStarted: () -> Unit) {
             )
 
             Text(
-                "Welcome to\nAccessMap",
+                "Welcome to\nPathly",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF0052CC),

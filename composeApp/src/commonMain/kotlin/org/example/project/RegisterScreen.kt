@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
@@ -25,7 +26,8 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    var successMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -99,9 +101,6 @@ fun RegisterScreen(
                 if (errorMessage.isNotEmpty()) {
                     Text(errorMessage, color = Color.Red, fontSize = 13.sp)
                 }
-                if (successMessage.isNotEmpty()) {
-                    Text(successMessage, color = Color(0xFF2E7D32), fontSize = 13.sp)
-                }
 
                 Button(
                     onClick = {
@@ -112,20 +111,40 @@ fun RegisterScreen(
                                 errorMessage = "Passwords do not match"
                             password.length < 6 ->
                                 errorMessage = "Password must be at least 6 characters"
-                            UserStore.emailExists(email.trim()) ->
-                                errorMessage = "Email already registered"
                             else -> {
-                                UserStore.register(username.trim(), email.trim(), password.trim())
-                                successMessage = "Account created! Redirecting..."
-                                onRegisterSuccess()
+                                isLoading = true
+                                scope.launch {
+                                    if (UserStore.emailExists(email.trim())) {
+                                        errorMessage = "Email already registered"
+                                        isLoading = false
+                                    } else {
+                                        val success = UserStore.register(
+                                            username.trim(),
+                                            email.trim(),
+                                            password.trim()
+                                        )
+                                        isLoading = false
+                                        if (success) onRegisterSuccess()
+                                        else errorMessage = "Registration failed, try again"
+                                    }
+                                }
                             }
                         }
                     },
+                    enabled = !isLoading,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0052CC))
                 ) {
-                    Text("REGISTER", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("REGISTER", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {

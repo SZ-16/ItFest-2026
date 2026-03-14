@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -24,6 +25,8 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -90,17 +93,31 @@ fun LoginScreen(
                         when {
                             email.isBlank() || password.isBlank() ->
                                 errorMessage = "Please fill in all fields"
-                            UserStore.login(email.trim(), password.trim()) != null ->
-                                onLoginSuccess()
-                            else ->
-                                errorMessage = "Invalid email or password"
+                            else -> {
+                                isLoading = true
+                                scope.launch {
+                                    val user = UserStore.login(email.trim(), password.trim())
+                                    isLoading = false
+                                    if (user != null) onLoginSuccess()
+                                    else errorMessage = "Invalid email or password"
+                                }
+                            }
                         }
                     },
+                    enabled = !isLoading,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0052CC))
                 ) {
-                    Text("LOGIN", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("LOGIN", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {

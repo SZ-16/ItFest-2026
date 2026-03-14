@@ -13,12 +13,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @Composable
 fun ForgotPasswordScreen(onGoToLogin: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     var isSuccess by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -77,21 +80,35 @@ fun ForgotPasswordScreen(onGoToLogin: () -> Unit) {
                                 message = "Please enter your email"
                                 isSuccess = false
                             }
-                            UserStore.emailExists(email.trim()) -> {
-                                message = "✓ Reset instructions sent to ${email.trim()}"
-                                isSuccess = true
-                            }
                             else -> {
-                                message = "No account found with this email"
-                                isSuccess = false
+                                isLoading = true
+                                scope.launch {
+                                    if (UserStore.emailExists(email.trim())) {
+                                        message = "✓ Reset instructions sent to ${email.trim()}"
+                                        isSuccess = true
+                                    } else {
+                                        message = "No account found with this email"
+                                        isSuccess = false
+                                    }
+                                    isLoading = false
+                                }
                             }
                         }
                     },
+                    enabled = !isLoading,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0052CC))
                 ) {
-                    Text("SEND RESET LINK", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("SEND RESET LINK", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
 
                 TextButton(onClick = onGoToLogin) {
