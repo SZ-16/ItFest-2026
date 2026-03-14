@@ -8,5 +8,7 @@ object DatabaseConfig {
     private const val USER = "postgres"
     private const val PASS = "stefan"
 
-    fun getConnection(): Connection = DriverManager.getConnection(URL, USER, PASS)
+    fun getConnection(): Connection {
+        return DriverManager.getConnection(URL, USER, PASS)
+    }
 }
