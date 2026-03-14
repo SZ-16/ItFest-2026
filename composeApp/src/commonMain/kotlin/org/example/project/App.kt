@@ -36,9 +36,11 @@ fun App() {
                 onGetStarted = { currentScreen = Screen.DISABILITY_SELECT }
             )
             Screen.DISABILITY_SELECT -> DisabilitySelectScreen(
-                onContinue = { currentScreen = Screen.MAP }
+                onContinue = { currentScreen = Screen.MAIN }
             )
-            Screen.MAP -> MapScreen()
+            Screen.MAIN -> MainScreen(
+                onLogout = { currentScreen = Screen.LOGIN }
+            )
         }
     }
 }

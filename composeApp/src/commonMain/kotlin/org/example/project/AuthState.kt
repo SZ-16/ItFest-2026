@@ -6,5 +6,12 @@ enum class Screen {
     FORGOT_PASSWORD,
     WELCOME,
     DISABILITY_SELECT,
-    MAP
+    MAIN
+}
+
+object CurrentUser {
+    var userId: Int = -1
+    var username: String = ""
+    var email: String = ""
+    var profile: DisabilityProfile = DisabilityProfile()
 }
