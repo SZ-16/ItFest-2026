@@ -31,6 +31,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.osmdroid) // ADDED HERE
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
