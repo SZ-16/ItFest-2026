@@ -1,6 +1,7 @@
 package org.example.project
 
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.http.*
@@ -8,13 +9,12 @@ import io.ktor.http.*
 fun Application.configureRouting() {
     routing {
 
-        // Root path to test if server is even awake
         get("/") {
             call.respondText("Accessibility Server is LIVE!")
         }
 
-        // This handles the path: http://localhost:8080/api/waypoints
         route("/api") {
+
             get("/waypoints") {
                 val list = mutableListOf<Waypoint>()
                 try {
@@ -37,12 +37,57 @@ fun Application.configureRouting() {
                     }
                     call.respond(list)
                 } catch (e: Exception) {
-                    // Log the error to the console so you can see why the DB failed
-                    application.log.error("Database error: ${e.message}")
                     call.respond(HttpStatusCode.InternalServerError, "Database Error: ${e.message}")
                 }
             }
-        }
 
+            post("/register") {
+                val req = call.receive<RegisterRequest>()
+                try {
+                    DatabaseConfig.getConnection().use { conn ->
+                        val stmt = conn.prepareStatement(
+                            "INSERT INTO users (email, username, password_hash) VALUES (?, ?, ?)"
+                        )
+                        stmt.setString(1, req.email)
+                        stmt.setString(2, req.username)
+                        stmt.setString(3, req.password)
+                        stmt.executeUpdate()
+
+                        call.respondText("""{"success": true, "message": "User registered successfully!"}""", ContentType.Application.Json)
+                    }
+                } catch (e: Exception) {
+                    application.log.error("Register error: ${e.message}")
+                    call.respond(HttpStatusCode.Conflict, """{"success": false, "message": "Email already exists or DB error"}""")
+                }
+            }
+
+            post("/login") {
+                val req = call.receive<LoginRequest>()
+                try {
+                    DatabaseConfig.getConnection().use { conn ->
+                        val stmt = conn.prepareStatement(
+                            "SELECT id, username FROM users WHERE email = ? AND password_hash = ?"
+                        )
+                        stmt.setString(1, req.email)
+                        stmt.setString(2, req.password)
+
+                        val rs = stmt.executeQuery()
+                        if (rs.next()) {
+                            val id = rs.getInt("id")
+                            val username = rs.getString("username")
+                            call.respondText(
+                                """{"success": true, "user_id": $id, "username": "$username"}""",
+                                ContentType.Application.Json
+                            )
+                        } else {
+                            call.respond(HttpStatusCode.Unauthorized, """{"success": false, "message": "Invalid email or password"}""")
+                        }
+                    }
+                } catch (e: Exception) {
+                    application.log.error("Login error: ${e.message}")
+                    call.respond(HttpStatusCode.InternalServerError, """{"success": false, "message": "Server error"}""")
+                }
+            }
+        }
     }
 }
