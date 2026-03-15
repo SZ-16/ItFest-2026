@@ -10,5 +10,6 @@ fun main() {
 }
 
 fun Application.module() {
+    configureSerialization() // <--- MUST BE ABOVE ROUTING
     configureRouting()
 }
