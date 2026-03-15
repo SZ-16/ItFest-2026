@@ -1,4 +1,5 @@
 package org.example.project
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -8,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-enum class BottomTab { HOME, MAP, REPORT, PROFILE }
+enum class BottomTab { HOME, MAP, PROFILE }
 
 @Composable
 fun MainScreen(onLogout: () -> Unit) {
@@ -43,17 +44,6 @@ fun MainScreen(onLogout: () -> Unit) {
                     )
                 )
                 NavigationBarItem(
-                    selected = currentTab == BottomTab.REPORT,
-                    onClick = { currentTab = BottomTab.REPORT },
-                    icon = { Icon(Icons.Filled.Add, contentDescription = "Report") },
-                    label = { Text("Report") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF0052CC),
-                        selectedTextColor = Color(0xFF0052CC),
-                        indicatorColor = Color(0xFFE8F0FE)
-                    )
-                )
-                NavigationBarItem(
                     selected = currentTab == BottomTab.PROFILE,
                     onClick = { currentTab = BottomTab.PROFILE },
                     icon = { Icon(Icons.Filled.AccountCircle, contentDescription = "Profile") },
@@ -71,7 +61,6 @@ fun MainScreen(onLogout: () -> Unit) {
             when (currentTab) {
                 BottomTab.HOME    -> HomeScreen()
                 BottomTab.MAP     -> MapScreen()
-                BottomTab.REPORT  -> ReportForm(onDismiss = { currentTab = BottomTab.MAP })
                 BottomTab.PROFILE -> ProfileScreen(onLogout = onLogout)
             }
         }
